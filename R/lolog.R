@@ -29,6 +29,8 @@
 #' @param maxStepSize The largest allowed value for dampening.
 #' @param cluster A parallel cluster to use for graph simulation.
 #' @param verbose Level of verbosity 0-3.
+#' @param truncated If TRUE will do truncated lolog with truncRate proportion of edges considered 
+#' @param truncRate Proportion of dyads to be included
 #'
 #'
 #' @details
@@ -151,14 +153,18 @@ lolog <- function(formula,
                   startingStepSize = .1,
                   maxStepSize = .5,
                   cluster = NULL,
-                  verbose = TRUE) {
+                  verbose = TRUE,
+                  truncated = FALSE,
+                  truncRate = 1
+                  ) {
   vcat <- function(..., vl=1){ if(verbose >= vl) cat(...) }
   vprint <- function(..., vl=1){ if(verbose >= vl) print(...) }
   
   #initialize theta via variational inference
   if (is.null(theta)) {
     vcat("Initializing Using Variational Fit\n")
-    varFit <- lologVariational(formula, dyadInclusionRate = 1)
+    varFit <- lologVariational(formula, dyadInclusionRate = 1,truncated = truncated,truncRate = truncRate)
+
     if (varFit$allDyadIndependent) {
       vcat("Model is dyad independent. Returning maximum likelihood estimate.\n")
       return(varFit)
@@ -222,6 +228,8 @@ lolog <- function(formula,
     clusterExport(cluster, "network", envir = environment())
     clusterExport(cluster, "orderIndependent", envir = environment())
     clusterExport(cluster, "includeOrderIndependent", envir = environment())
+    clusterExport(cluster, "truncated", envir = environment())
+    clusterExport(cluster, "truncRate", envir = environment())
     clusterEvalQ(cluster, {
       # Load lolog on each node
       library(lolog)
@@ -261,7 +269,12 @@ lolog <- function(formula,
       for (i in 1:nsamp) {
         if (verbose)
           utils::setTxtProgressBar(pb, i)
-        samp <- lolik$generateNetwork()
+        # if truncated use the truncated network generate otherwise use the whole network generation:
+        if(truncated){
+          samp <- lolik$generateNetworkUnconstrained(truncRate = truncRate)
+        }else{
+          samp <- lolik$generateNetwork()
+        }
         if (!is.null(auxFormula)) {
           auxModel$setNetwork(samp$network)
           auxModel$calculate()
@@ -278,7 +291,11 @@ lolog <- function(formula,
     } else{
       worker <- function(i, theta) {
         lolik2$setThetas(theta)
-        samp <- lolik2$generateNetwork()
+        if(truncated){
+          samp <- lolik2$generateNetworkUnconstrained(truncRate = truncRate)
+        }else{
+          samp <- lolik2$generateNetwork()
+        }
         if (!is.null(auxTerms)) {
           auxModel2$setNetwork(samp$network)
           auxModel2$calculate()

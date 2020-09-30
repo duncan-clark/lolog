@@ -63,7 +63,7 @@ gofit <- function(object, ...) {
 #'
 #'
 #' @method gofit lolog
-gofit.lolog <- function(object, formula, nsim = 100, ...) {
+gofit.lolog <- function(object, formula, nsim = 100,truncRate = NULL, ...) {
   model <- createCppModel(formula)
   observedNetwork <- object$likelihoodModel$getModel()$getNetwork()
   model$setNetwork(observedNetwork)
@@ -73,7 +73,11 @@ gofit.lolog <- function(object, formula, nsim = 100, ...) {
   stats <- matrix(0, nrow = nsim, ncol = ns)
   model$calculate
   for (i in 1:nsim) {
-    net <- object$likelihoodModel$generateNetwork()$network
+    if(!is.null(truncRate)){
+      net <- object$likelihoodModel$generateNetworkUnconstrained(truncRate = truncRate)
+    }else{
+      net <- object$likelihoodModel$generateNetwork()$network
+    }
     model$setNetwork(net)
     model$calculate()
     stats[i, ] <- model$statistics()

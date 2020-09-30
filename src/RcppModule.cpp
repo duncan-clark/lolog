@@ -118,12 +118,14 @@ RCPP_MODULE(lolog) {
     .method("getModel",&LatentOrderLikelihood<Undirected>::getModelR)
     .method("setThetas",&LatentOrderLikelihood<Undirected>::setThetas)
     .method("variationalModelFrame",&LatentOrderLikelihood<Undirected>::variationalModelFrame)
+    .method("variationalModelFrameUnconstrained",&LatentOrderLikelihood<Undirected>::variationalModelFrameUnconstrained)
     .method("variationalModelFrameWithFunc",&LatentOrderLikelihood<Undirected>::variationalModelFrameWithFunc)
     .method("generateNetwork",&LatentOrderLikelihood<Undirected>::generateNetwork)
     //added in
     .method("calcChangeStats",&LatentOrderLikelihood<Undirected>::calcChangeStats)
     .method("generateNetworkReturnChanges",&LatentOrderLikelihood<Undirected>::generateNetworkReturnChanges)
     .method("generateNetworkWithEdgeOrder",&LatentOrderLikelihood<Undirected>::generateNetworkWithEdgeOrder)
+    .method("generateNetworkUnconstrained",&LatentOrderLikelihood<Undirected>::generateNetworkUnconstrained)
     
     ;
 
@@ -133,13 +135,15 @@ RCPP_MODULE(lolog) {
     .method("getModel",&LatentOrderLikelihood<Directed>::getModelR)
     .method("setThetas",&LatentOrderLikelihood<Directed>::setThetas)
     .method("variationalModelFrame",&LatentOrderLikelihood<Directed>::variationalModelFrame)
+    .method("variationalModelFrameUnconstrained",&LatentOrderLikelihood<Directed>::variationalModelFrameUnconstrained)
     .method("variationalModelFrameWithFunc",&LatentOrderLikelihood<Directed>::variationalModelFrameWithFunc)
     .method("generateNetwork",&LatentOrderLikelihood<Directed>::generateNetwork)
     //added in
     .method("calcChangeStats",&LatentOrderLikelihood<Directed>::calcChangeStats)
     .method("generateNetworkReturnChanges",&LatentOrderLikelihood<Directed>::generateNetworkReturnChanges)
     .method("generateNetworkWithEdgeOrder",&LatentOrderLikelihood<Directed>::generateNetworkWithEdgeOrder)
-    
+    .method("generateNetworkUnconstrained",&LatentOrderLikelihood<Directed>::generateNetworkUnconstrained)
+ 
     ;
 
     function("initLologStatistics",&initStats);

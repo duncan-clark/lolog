@@ -63,7 +63,9 @@
 lologVariational <- function(formula,
                              nReplicates = 5L,
                              dyadInclusionRate = NULL,
-                             targetFrameSize = 500000) {
+                             targetFrameSize = 500000,
+                             truncated = FALSE,
+                             truncRate = 1) {
   lolik <- createLatentOrderLikelihood(formula)
   nReplicates <- as.integer(nReplicates)
   
@@ -86,8 +88,14 @@ lologVariational <- function(formula,
   if (is.null(dyadInclusionRate)) {
     dyadInclusionRate <- min(1, targetFrameSize / ndyads)
   }
-  samples <-
-    lolik$variationalModelFrame(nReplicates, dyadInclusionRate)
+  
+  if(truncated){
+    # Keeps all the dyads that are present in the network, and adds empty dyads to make up to the right number of dyads
+    samples <-lolik$variationalModelFrameUnconstrained(nReplicates, dyadInclusionRate,truncRate)
+  }else{
+    samples <-lolik$variationalModelFrame(nReplicates, dyadInclusionRate)
+  }
+
   predictors <- lapply(samples, function(x)
     as.data.frame(x[[2]],
                   col.names = 1:length(x[[2]])))
